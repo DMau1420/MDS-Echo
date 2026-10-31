@@ -1,1 +1,62 @@
-/node_modules
+# Rust
+**/target/
+target/
+**/*.rs.bk
+
+# Python
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+backend/.venv/
+backend/venv/
+*.egg-info/
+.pytest_cache/
+
+# Node / Frontend
+node_modules/
+**/node_modules/
+.svelte-kit/
+**/.svelte-kit/
+build/
+dist/
+.output/
+.vercel/
+.netlify/
+
+# Logs & OS
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Environment variables & credentials
+.env
+.env.*
+!.env.example
+!.env.test
+
+# IDEs
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Audios descargados (se conservan solo audios base y .gitkeep)
+audios_prueba/*
+!audios_prueba/.gitkeep
+!audios_prueba/Voyaging_Stars_Farewell.m4a
+!audios_prueba/spoken_for.m4a

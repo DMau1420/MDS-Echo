@@ -4,6 +4,12 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	server: {
+		proxy: {
+			'/api': 'http://127.0.0.1:8000',
+			'/reproducir': 'http://127.0.0.1:8000'
+		}
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({
@@ -18,5 +24,8 @@ export default defineConfig({
 			// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 			adapter: adapter()
 		})
-	]
+	],
+	ssr: {
+		noExternal: ['cookie']
+	}
 });
