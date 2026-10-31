@@ -45,25 +45,25 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if player.isFullscreen && track}
-  <div class="fixed inset-0 z-50 bg-[#07070b]/98 text-white flex flex-col justify-between p-6 md:p-10 overflow-hidden select-none animate-in fade-in duration-300">
+  <div class="fixed inset-0 z-50 bg-[#07070b]/98 text-white flex flex-col justify-between p-4 sm:p-6 md:p-10 overflow-hidden select-none animate-in fade-in duration-300">
     <!-- Dynamic Ambient Glow Mesh in Cinema Mode -->
     <div
-      class="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[180px] opacity-20 pointer-events-none transition-all duration-1000 ease-out z-0"
+      class="absolute top-1/4 left-1/4 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] rounded-full blur-[140px] sm:blur-[180px] opacity-20 pointer-events-none transition-all duration-1000 ease-out z-0"
       style="background: {track.accentColor || '#6366f1'};"
     ></div>
     <div
-      class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[180px] opacity-15 pointer-events-none transition-all duration-1000 ease-out z-0"
+      class="absolute bottom-1/4 right-1/4 w-[250px] sm:w-[500px] h-[250px] sm:h-[500px] rounded-full blur-[140px] sm:blur-[180px] opacity-15 pointer-events-none transition-all duration-1000 ease-out z-0"
       style="background: #ec4899;"
     ></div>
 
     <!-- Top Bar: Cinema Brand & Exit -->
-    <div class="relative z-10 flex items-center justify-between pb-2 border-b border-white/5">
-      <div class="flex items-center gap-3">
-        <span class="text-xs font-mono tracking-widest uppercase text-pink-400 font-bold flex items-center gap-2">
+    <div class="relative z-10 flex items-center justify-between pb-2 border-b border-white/5 shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <span class="text-[11px] sm:text-xs font-mono tracking-widest uppercase text-pink-400 font-bold flex items-center gap-1.5 sm:gap-2">
           <span class="w-2 h-2 rounded-full bg-pink-400 animate-pulse"></span>
-          MODO CINEMA • LETRAS
+          MODO CINEMA
         </span>
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/10 font-mono">
+        <span class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/10 font-mono">
           {track.format}
         </span>
       </div>
@@ -71,37 +71,39 @@
       <button
         type="button"
         onclick={() => (player.isFullscreen = false)}
-        class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition text-xs font-semibold"
+        class="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition text-xs font-semibold"
         title="Salir del Modo Cinema (Esc)"
       >
-        <span>Salir</span>
+        <span>Cerrar</span>
         <span>✕</span>
       </button>
     </div>
 
     <!-- Center: Split View (Left: Album Art & Details | Right: Full Synced Lyrics Spotify Style) -->
-    <div class="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-14 my-4 overflow-hidden">
+    <div class="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-8 md:gap-14 my-2 sm:my-4 overflow-hidden">
       <!-- Left Column: Album Artwork & Track Info -->
-      <div class="w-full lg:w-5/12 flex flex-col items-center lg:items-start text-center lg:text-left gap-6 shrink-0 max-w-md">
-        <div class="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-black/60 flex flex-col items-center justify-center p-6 text-center group">
+      <div class="w-full lg:w-5/12 flex flex-row lg:flex-col items-center lg:items-start text-left gap-3.5 sm:gap-6 shrink-0 max-w-md">
+        <!-- Artwork -->
+        <div class="relative w-20 h-20 sm:w-48 sm:h-48 lg:w-80 lg:h-80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-black/60 flex flex-col items-center justify-center p-3 sm:p-6 text-center group shrink-0">
           {#if track.coverUrl}
             <img src={track.coverUrl} alt={track.title} class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" />
           {:else}
-            <span class="text-8xl group-hover:scale-105 transition duration-500">🎵</span>
-            <span class="text-xs font-mono uppercase tracking-widest text-indigo-400 font-bold mt-4">
+            <span class="text-3xl sm:text-6xl lg:text-8xl group-hover:scale-105 transition duration-500">🎵</span>
+            <span class="hidden sm:inline text-xs font-mono uppercase tracking-widest text-indigo-400 font-bold mt-4">
               {track.format} AUDIO
             </span>
           {/if}
         </div>
 
-        <div class="w-full">
-          <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+        <!-- Info -->
+        <div class="w-full min-w-0">
+          <h1 class="text-base sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight truncate sm:whitespace-normal">
             {track.title}
           </h1>
-          <p class="text-lg sm:text-xl md:text-2xl text-white/70 font-semibold mt-1">
+          <p class="text-xs sm:text-lg md:text-xl text-white/70 font-semibold mt-0.5 sm:mt-1 truncate">
             {track.artist}
           </p>
-          <p class="text-xs sm:text-sm text-white/40 mt-1 font-mono">
+          <p class="text-[10px] sm:text-xs text-white/40 mt-0.5 font-mono truncate">
             {track.album} • {formatBytes(track.size_bytes)}
           </p>
         </div>
@@ -110,12 +112,12 @@
       <!-- Right Column: Full Synced Lyrics (Estilo Spotify con auto-scroll y resaltado) -->
       <div class="w-full lg:w-7/12 h-full flex flex-col overflow-hidden relative">
         <!-- Subtle Top & Bottom Gradient Masks for seamless fade out -->
-        <div class="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-[#07070b]/98 to-transparent pointer-events-none z-10"></div>
-        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#07070b]/98 to-transparent pointer-events-none z-10"></div>
+        <div class="absolute top-0 left-0 right-0 h-10 sm:h-16 bg-gradient-to-b from-[#07070b]/98 to-transparent pointer-events-none z-10"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-10 sm:h-16 bg-gradient-to-t from-[#07070b]/98 to-transparent pointer-events-none z-10"></div>
 
         <div
           bind:this={lyricsContainerEl}
-          class="flex-1 overflow-y-auto scrollbar-none flex flex-col gap-6 py-28 px-4 md:px-8 scroll-smooth"
+          class="flex-1 overflow-y-auto scrollbar-none flex flex-col gap-4 sm:gap-6 py-12 sm:py-28 px-2 sm:px-8 scroll-smooth"
         >
           {#if player.lyrics.length > 0}
             {#each player.lyrics as line, idx}
@@ -125,10 +127,10 @@
                 type="button"
                 data-cinema-idx={idx}
                 onclick={() => handleSeekTo(line.time)}
-                class="text-left group transition-all duration-300 w-full rounded-2xl py-2 px-3 flex items-start gap-4 cursor-pointer outline-none {isActive ? 'scale-[1.03] origin-left' : ''}"
+                class="text-left group transition-all duration-300 w-full rounded-2xl py-1.5 sm:py-2 px-2 sm:px-3 flex items-start gap-3 sm:gap-4 cursor-pointer outline-none {isActive ? 'scale-[1.02] sm:scale-[1.03] origin-left' : ''}"
               >
                 <p
-                  class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-relaxed transition-all duration-300 {isActive ? 'text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.45)] font-black' : isPast ? 'text-white/25 hover:text-white/60' : 'text-white/20 hover:text-white/60'}"
+                  class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-relaxed transition-all duration-300 {isActive ? 'text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.45)] font-black' : isPast ? 'text-white/25 hover:text-white/60' : 'text-white/20 hover:text-white/60'}"
                 >
                   {line.text}
                 </p>
@@ -136,10 +138,10 @@
             {/each}
           {:else}
             <!-- Empty state in cinema mode -->
-            <div class="flex-1 flex flex-col items-center justify-center text-center p-8 text-zinc-500 gap-3">
-              <span class="text-4xl">🎤</span>
-              <p class="text-lg font-bold text-white">No hay letras sincronizadas</p>
-              <p class="text-xs text-zinc-400">Las letras se cargarán automáticamente cuando estén disponibles.</p>
+            <div class="flex-1 flex flex-col items-center justify-center text-center p-6 text-zinc-500 gap-2 sm:gap-3">
+              <span class="text-3xl sm:text-4xl">🎤</span>
+              <p class="text-sm sm:text-lg font-bold text-white">No hay letras sincronizadas</p>
+              <p class="text-xs text-zinc-400">Las letras se sincronizarán cuando estén disponibles para esta canción.</p>
             </div>
           {/if}
         </div>
@@ -147,10 +149,10 @@
     </div>
 
     <!-- Bottom Controls & Timeline -->
-    <div class="relative z-10 max-w-3xl w-full mx-auto flex flex-col gap-3 pt-2">
+    <div class="relative z-10 max-w-3xl w-full mx-auto flex flex-col gap-2.5 sm:gap-3 pt-1 shrink-0">
       <!-- Progress Bar -->
-      <div class="flex items-center gap-4 text-xs font-mono text-white/60">
-        <span class="w-10 text-right">{formatTime(player.currentTime)}</span>
+      <div class="flex items-center gap-2.5 sm:gap-4 text-[11px] sm:text-xs font-mono text-white/60">
+        <span class="w-8 sm:w-10 text-right">{formatTime(player.currentTime)}</span>
         <input
           type="range"
           min="0"
@@ -158,17 +160,17 @@
           step="0.1"
           value={player.currentTime}
           oninput={(e) => player.seek(Number((e.target as HTMLInputElement).value))}
-          class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-400"
+          class="w-full h-1 sm:h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-400"
         />
-        <span class="w-10">{formatTime(player.duration)}</span>
+        <span class="w-8 sm:w-10">{formatTime(player.duration)}</span>
       </div>
 
       <!-- Playback buttons -->
-      <div class="flex items-center justify-center gap-8">
+      <div class="flex items-center justify-center gap-5 sm:gap-8">
         <button
           type="button"
           onclick={() => player.toggleShuffle()}
-          class="text-xl transition {player.shuffle ? 'text-indigo-400' : 'text-white/40 hover:text-white'}"
+          class="text-lg sm:text-xl transition {player.shuffle ? 'text-indigo-400' : 'text-white/40 hover:text-white'}"
           title="Aleatorio"
         >
           🔀
@@ -177,7 +179,7 @@
         <button
           type="button"
           onclick={() => player.prevTrack()}
-          class="text-3xl text-white/80 hover:text-white hover:scale-110 transition"
+          class="text-2xl sm:text-3xl text-white/80 hover:text-white hover:scale-110 active:scale-95 transition"
           title="Anterior"
         >
           ⏮
@@ -186,7 +188,7 @@
         <button
           type="button"
           onclick={() => player.togglePlay()}
-          class="w-14 h-14 rounded-full bg-white text-black text-2xl flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition"
+          class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white text-black text-xl sm:text-2xl flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition"
         >
           {player.isPlaying ? '⏸' : '▶'}
         </button>
@@ -194,7 +196,7 @@
         <button
           type="button"
           onclick={() => player.nextTrack()}
-          class="text-3xl text-white/80 hover:text-white hover:scale-110 transition"
+          class="text-2xl sm:text-3xl text-white/80 hover:text-white hover:scale-110 active:scale-95 transition"
           title="Siguiente"
         >
           ⏭
@@ -203,7 +205,7 @@
         <button
           type="button"
           onclick={() => player.cycleRepeat()}
-          class="text-xl transition {player.repeatMode !== 'off' ? 'text-indigo-400' : 'text-white/40 hover:text-white'}"
+          class="text-lg sm:text-xl transition {player.repeatMode !== 'off' ? 'text-indigo-400' : 'text-white/40 hover:text-white'}"
           title="Repetir"
         >
           {player.repeatMode === 'one' ? '🔂' : '🔁'}

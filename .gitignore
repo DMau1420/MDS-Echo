@@ -9,8 +9,10 @@ target/
 *$py.class
 *.so
 .Python
+**/.venv/
 .venv/
 venv/
+**/venv/
 ENV/
 env/
 backend/.venv/
@@ -57,6 +59,4 @@ Thumbs.db
 
 # Audios descargados (se conservan solo audios base y .gitkeep)
 audios_prueba/*
-!audios_prueba/.gitkeep
-!audios_prueba/Voyaging_Stars_Farewell.m4a
-!audios_prueba/spoken_for.m4a
+lyrics/*

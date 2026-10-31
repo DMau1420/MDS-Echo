@@ -10,8 +10,19 @@
 </script>
 
 {#if player.rightPanel !== 'none'}
-  <aside class="w-80 md:w-96 bg-zinc-950/95 backdrop-blur-2xl border-l border-white/10 flex flex-col justify-between shrink-0 h-full z-20 transition-all select-none">
-    <!-- Panel Clean Header (Sin navbar de detalles, cola, letras) -->
+  <!-- Mobile Backdrop overlay -->
+  <div
+    class="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm md:hidden transition-opacity"
+    onclick={closePanel}
+    role="button"
+    tabindex="0"
+    onkeydown={(e) => { if (e.key === 'Escape') closePanel(); }}
+    aria-label="Cerrar panel"
+  ></div>
+
+  <!-- Right Drawer (Modal/Drawer on mobile, Sidebar on desktop) -->
+  <aside class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 md:relative md:z-20 md:w-80 lg:w-96 bg-zinc-950/98 md:bg-zinc-950/95 backdrop-blur-2xl border-l border-white/10 flex flex-col justify-between shrink-0 h-full transition-all select-none shadow-2xl animate-in slide-in-from-right duration-200">
+    <!-- Panel Clean Header -->
     <div class="p-4 border-b border-white/5 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full {player.isPlaying ? 'bg-indigo-400 animate-pulse' : 'bg-zinc-600'}"></span>
@@ -31,7 +42,7 @@
     </div>
 
     <!-- Panel Body -->
-    <div class="flex-1 overflow-y-auto p-5 flex flex-col gap-5 scrollbar-thin">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-5 scrollbar-thin">
       <!-- VISTA DE COLA (cuando se abre desde el botón de cola en el reproductor) -->
       {#if player.rightPanel === 'queue'}
         <div class="flex flex-col gap-6">
@@ -140,7 +151,7 @@
               </div>
             </div>
 
-            <!-- 2. ABAJO: Las Lyrics (Con fondo degradado como pista destacada, centradas, sin marcas de tiempo, sin separadores) -->
+            <!-- 2. ABAJO: Las Lyrics -->
             <div class="w-full">
               <LyricsView />
             </div>

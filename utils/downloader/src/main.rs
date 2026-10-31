@@ -69,6 +69,10 @@ async fn handle_client(stream: tokio::net::TcpStream) {
 async fn download_yt(url: String) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let libraries_dir = PathBuf::from("/bin");
     let output_dir = PathBuf::from("/home/maulinux/Scrips/proyectos/MDS-Echo/audios_prueba");
+    let lyrics_dir = PathBuf::from("/home/maulinux/Scrips/proyectos/MDS-Echo/lyrics");
+
+    tokio::fs::create_dir_all(&output_dir).await.ok();
+    tokio::fs::create_dir_all(&lyrics_dir).await.ok();
 
     let youtube = libraries_dir.join("yt-dlp");
     let ffmpeg = libraries_dir.join("ffmpeg");
@@ -79,10 +83,18 @@ async fn download_yt(url: String) -> Result<String, Box<dyn std::error::Error + 
         .await?;
 
     let video = downloader.fetch_video_infos(url.clone()).await?;
-    let clean_title = video.title.replace(['/', '\\', '\0'], "_");
+
+    // Reemplazar espacios y caracteres no válidos de ruta por guiones bajos
+    let clean_title: String = video
+        .title
+        .chars()
+        .map(|c| if c.is_whitespace() || c == '/' || c == '\\' || c == '\0' { '_' } else { c })
+        .collect();
+
     let audio_path = output_dir.join(format!("{}.m4a", clean_title));
     let output_template = output_dir.join(format!("{}.%(ext)s", clean_title));
     let img_name = output_dir.join(format!("{}.jpg", clean_title));
+    let lyrics_path = lyrics_dir.join(format!("{}.json", clean_title));
 
     let executor = Executor::new(
         youtube,
@@ -107,6 +119,34 @@ async fn download_yt(url: String) -> Result<String, Box<dyn std::error::Error + 
     println!("Descargados:");
     println!("{}", audio_path.display());
     println!("{}", miniatura.display());
+
+    // Inmediatamente pasar por lyrics_generator
+    println!("Iniciando generación de letras con Whisper...");
+    let py_venv = PathBuf::from("/home/maulinux/Scrips/proyectos/MDS-Echo/utils/lyrics_generator/.venv/bin/python");
+    let script_path = PathBuf::from("/home/maulinux/Scrips/proyectos/MDS-Echo/utils/lyrics_generator/src/main.py");
+
+    let mut cmd = if py_venv.exists() {
+        tokio::process::Command::new(py_venv)
+    } else {
+        tokio::process::Command::new("python3")
+    };
+
+    cmd.arg(&script_path)
+        .arg(&audio_path)
+        .arg(&lyrics_path);
+
+    match cmd.status().await {
+        Ok(status) => {
+            if status.success() {
+                println!("Letras generadas exitosamente en: {}", lyrics_path.display());
+            } else {
+                eprintln!("lyrics_generator finalizó con código: {:?}", status.code());
+            }
+        }
+        Err(e) => {
+            eprintln!("Error al ejecutar lyrics_generator: {}", e);
+        }
+    }
 
     Ok(clean_title)
 }

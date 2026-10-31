@@ -3,8 +3,16 @@
 
   let songUrl = $state('');
 
-  function setTab(tab: ActiveTab) {
-    player.activeTab = tab;
+  function goHome() {
+    player.activeFilter = 'Todo';
+    player.activeTab = 'home';
+    player.isMobileSidebarOpen = false;
+  }
+
+  function goAllTracks() {
+    player.activeFilter = 'todas';
+    player.activeTab = 'home';
+    player.isMobileSidebarOpen = false;
   }
 
   function openAddSongModal() {
@@ -12,6 +20,7 @@
     player.downloadError = null;
     player.downloadSuccess = null;
     player.isAddSongModalOpen = true;
+    player.isMobileSidebarOpen = false;
   }
 
   function closeAddSongModal() {
@@ -31,7 +40,93 @@
   }
 </script>
 
-<aside class="w-64 bg-zinc-950/80 backdrop-blur-2xl border-r border-white/5 flex flex-col justify-between select-none shrink-0 z-20">
+<!-- Mobile Drawer Backdrop & Drawer -->
+{#if player.isMobileSidebarOpen}
+  <div
+    class="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden transition-opacity"
+    onclick={() => (player.isMobileSidebarOpen = false)}
+    role="button"
+    tabindex="0"
+    onkeydown={(e) => { if (e.key === 'Escape') player.isMobileSidebarOpen = false; }}
+    aria-label="Cerrar menú móvil"
+  ></div>
+
+  <aside class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-zinc-950 border-r border-white/10 flex flex-col justify-between p-6 shadow-2xl md:hidden select-none animate-in slide-in-from-left duration-200">
+    <div class="flex flex-col gap-6">
+      <!-- Mobile Drawer Header -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+          </div>
+          <div>
+            <span class="text-xl font-black tracking-wider text-white">ECHO</span>
+            <span class="text-[10px] block font-mono text-indigo-400 font-semibold tracking-widest uppercase">Music Player</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onclick={() => (player.isMobileSidebarOpen = false)}
+          class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition"
+          title="Cerrar menú"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Mobile Navigation Links -->
+      <nav class="flex flex-col gap-1.5 text-sm font-medium">
+        <!-- Inicio -->
+        <button
+          type="button"
+          onclick={goHome}
+          class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition text-left {player.activeTab === 'home' && player.activeFilter === 'Todo' ? 'bg-white/10 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"
+        >
+          <svg class="w-5 h-5 shrink-0 {player.activeTab === 'home' && player.activeFilter === 'Todo' ? 'text-indigo-400' : 'text-zinc-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span>Inicio</span>
+        </button>
+
+        <!-- Todas las Canciones -->
+        <button
+          type="button"
+          onclick={goAllTracks}
+          class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition text-left {player.activeTab === 'home' && player.activeFilter === 'todas' ? 'bg-white/10 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"
+        >
+          <svg class="w-5 h-5 shrink-0 {player.activeTab === 'home' && player.activeFilter === 'todas' ? 'text-indigo-400' : 'text-zinc-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+          </svg>
+          <span>Todas las Canciones</span>
+        </button>
+
+        <!-- Agregar canción -->
+        <button
+          type="button"
+          onclick={openAddSongModal}
+          class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition text-left {player.isAddSongModalOpen ? 'bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"
+        >
+          <svg class="w-5 h-5 shrink-0 {player.isAddSongModalOpen ? 'text-indigo-400' : 'text-zinc-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Agregar canción</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Bottom info on mobile -->
+    <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-zinc-500">
+      <span>Echo v1.0</span>
+      <span>{player.tracks.length} canciones</span>
+    </div>
+  </aside>
+{/if}
+
+<!-- Desktop Sidebar -->
+<aside class="hidden md:flex w-64 bg-zinc-950/80 backdrop-blur-2xl border-r border-white/5 flex-col justify-between select-none shrink-0 z-20">
   <div class="p-6 flex flex-col gap-6">
     <!-- Brand Logo -->
     <div class="flex items-center justify-between">
@@ -53,13 +148,25 @@
 
     <!-- Main Navigation -->
     <nav class="flex flex-col gap-1.5 text-sm font-medium">
-      <!-- Todas las Canciones (Ventana Principal) -->
+      <!-- Inicio (Home con límite de 15) -->
       <button
         type="button"
-        onclick={() => setTab('home')}
-        class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition text-left {player.activeTab === 'home' ? 'bg-white/10 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"
+        onclick={goHome}
+        class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition text-left {player.activeTab === 'home' && player.activeFilter === 'Todo' ? 'bg-white/10 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"
       >
-        <svg class="w-5 h-5 shrink-0 {player.activeTab === 'home' ? 'text-indigo-400' : 'text-zinc-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 shrink-0 {player.activeTab === 'home' && player.activeFilter === 'Todo' ? 'text-indigo-400' : 'text-zinc-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <span>Inicio</span>
+      </button>
+
+      <!-- Todas las Canciones -->
+      <button
+        type="button"
+        onclick={goAllTracks}
+        class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition text-left {player.activeTab === 'home' && player.activeFilter === 'todas' ? 'bg-white/10 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"
+      >
+        <svg class="w-5 h-5 shrink-0 {player.activeTab === 'home' && player.activeFilter === 'todas' ? 'text-indigo-400' : 'text-zinc-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
         </svg>
         <span>Todas las Canciones</span>

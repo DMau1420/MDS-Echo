@@ -15,13 +15,13 @@
 <svelte:head>
   <title>
     {player.isPlaying && player.currentTrack
-      ? `▶ ${player.currentTrack.title} • ${player.currentTrack.artist} | ECHO`
+      ? `${player.currentTrack.title} • ${player.currentTrack.artist} | ECHO`
       : 'ECHO - Music Player'}
   </title>
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="relative h-screen w-screen bg-[#070709] text-zinc-100 flex flex-col overflow-hidden font-sans selection:bg-indigo-500/30">
+<div class="relative h-screen h-[100dvh] w-screen bg-[#070709] text-zinc-100 flex flex-col overflow-hidden font-sans selection:bg-indigo-500/30">
   <!-- Dynamic Apple Music Ambient Mesh Glow (adapts smoothly to playing song) -->
   <div
     class="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full blur-[160px] opacity-25 pointer-events-none transition-all duration-1000 ease-out z-0"
@@ -43,7 +43,7 @@
       <Header />
 
       <!-- Scrollable Main View -->
-      <main class="flex-1 overflow-y-auto px-8 py-6 scrollbar-thin bg-gradient-to-b from-transparent via-[#09090b]/80 to-[#09090b]">
+      <main class="flex-1 overflow-y-auto px-3 sm:px-8 py-4 sm:py-6 pb-28 md:pb-6 scrollbar-thin bg-gradient-to-b from-transparent via-[#09090b]/80 to-[#09090b]">
         {@render children()}
       </main>
     </div>

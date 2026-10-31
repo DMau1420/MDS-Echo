@@ -10,6 +10,7 @@ export interface Track {
   audioUrl: string;
   duration?: number;
   coverUrl?: string;
+  lyricsUrl?: string;
   isBackend: boolean;
   accentColor?: string;
 }
@@ -72,6 +73,7 @@ export class PlayerStore {
   isFullscreen = $state<boolean>(false);
   isVisualizerEnabled = $state<boolean>(true);
   isAddSongModalOpen = $state<boolean>(false);
+  isMobileSidebarOpen = $state<boolean>(false);
   isDownloadingSong = $state<boolean>(false);
   downloadError = $state<string | null>(null);
   downloadSuccess = $state<string | null>(null);
@@ -101,9 +103,9 @@ export class PlayerStore {
     this.isLoading = true;
     this.backendError = null;
     try {
-      const res = await fetch('http://localhost:8000/', { method: 'GET', signal: AbortSignal.timeout(3000) });
+      const res = await fetch('/api/tracks', { method: 'GET', signal: AbortSignal.timeout(4000) });
       if (res.ok) {
-        this.backendInfo = await res.json();
+        this.backendInfo = { status: 'Activo', service: 'FastAPI', version: '1.0.0' };
         this.backendOnline = true;
         await this.fetchBackendTracks();
       } else {
@@ -125,7 +127,7 @@ export class PlayerStore {
 
   async fetchBackendTracks() {
     try {
-      const res = await fetch('http://localhost:8000/api/tracks');
+      const res = await fetch('/api/tracks');
       if (res.ok) {
         const data = await res.json();
         const backendList: Track[] = data.map((item: {
@@ -138,6 +140,7 @@ export class PlayerStore {
           size_bytes: number;
           stream_url: string;
           cover_url?: string | null;
+          lyrics_url?: string | null;
         }) => ({
           id: item.id || `backend-${item.filename}`,
           filename: item.filename,
@@ -147,8 +150,9 @@ export class PlayerStore {
           format: item.format,
           size_bytes: item.size_bytes,
           stream_url: item.stream_url,
-          audioUrl: `http://localhost:8000${item.stream_url}`,
-          coverUrl: item.cover_url ? `http://localhost:8000${item.cover_url}` : undefined,
+          audioUrl: item.stream_url,
+          coverUrl: item.cover_url || undefined,
+          lyricsUrl: item.lyrics_url || undefined,
           isBackend: true
         }));
 
@@ -163,7 +167,7 @@ export class PlayerStore {
         } else if (backendList.length > 0) {
           this.currentTrack = backendList[0];
           this.queueIndex = 0;
-          this.setDefaultLyricsForCurrentTrack();
+          this.loadLyricsForTrack(backendList[0]);
         }
       }
     } catch (e: unknown) {
@@ -191,7 +195,7 @@ export class PlayerStore {
     this.downloadSuccess = null;
 
     try {
-      const res = await fetch('http://localhost:8000/descargar', {
+      const res = await fetch('/descargar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: cleanUrl })
@@ -235,9 +239,7 @@ export class PlayerStore {
     this.currentTime = 0;
     this.isPlaying = true;
 
-    if (!this.hasCustomLyrics) {
-      this.setDefaultLyricsForCurrentTrack();
-    }
+    this.loadLyricsForTrack(track);
 
     // Track recently played
     if (!this.recentlyPlayed.find((t) => t.id === track.id)) {
@@ -429,6 +431,42 @@ export class PlayerStore {
   }
 
   // Lyrics helpers
+  async loadLyricsForTrack(track: Track) {
+    this.lyrics = [];
+    this.lyricsStatus = 'waiting';
+    this.hasCustomLyrics = false;
+    this.rawLyricsJson = '';
+
+    const stem = track.filename.replace(/\.[^/.]+$/, '');
+    const urlCandidates: string[] = [];
+    if (track.lyricsUrl) {
+      urlCandidates.push(track.lyricsUrl);
+    }
+    urlCandidates.push(`/api/lyrics/${encodeURIComponent(stem)}.json`);
+    urlCandidates.push(`/api/lyrics/${encodeURIComponent(stem.replace(/\s+/g, '_'))}.json`);
+    urlCandidates.push(`/api/lyrics/${encodeURIComponent(stem.replace(/_/g, ' '))}.json`);
+
+    const tried = new Set<string>();
+    for (const url of urlCandidates) {
+      if (tried.has(url)) continue;
+      tried.add(url);
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (this.loadLyricsFromJson(data)) {
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn(`Error loading lyrics from ${url}:`, e);
+      }
+    }
+
+    this.lyrics = [];
+    this.lyricsStatus = 'waiting';
+  }
+
   parseTimeValue(val: unknown): number {
     if (typeof val === 'number') return val;
     if (typeof val === 'string') {
@@ -511,84 +549,6 @@ export class PlayerStore {
       console.warn('Error parsing lyrics JSON:', err);
       this.lyricsStatus = 'error';
       return false;
-    }
-  }
-
-  setDefaultLyricsForCurrentTrack() {
-    if (this.hasCustomLyrics) return;
-    const title = this.currentTrack?.title.toLowerCase() || '';
-    if (title.includes('voyaging')) {
-      const voyagingJson = {
-        "cancion": "Voyaging_Stars_Farewell",
-        "duración": "03:45",
-        "letra": {
-          "00:23": "There's no flake,",
-          "00:25": "was fell on my nose",
-          "00:27": "No flying backwards till last winter",
-          "00:33": "I realize the hellos are goodbyes",
-          "00:39": "The moment I softly let go of your hand",
-          "00:45": "Wings of fruit,",
-          "00:48": "trembling branches",
-          "00:50": "A song for soul bound to soar",
-          "00:54": "To the very edge of the staring ocean",
-          "00:58": "Even if I'm meant to fall apart",
-          "01:02": "I will get set where you are for all time",
-          "01:07": "Both voyage,",
-          "01:10": "may your path be clear",
-          "01:12": "May you get aware",
-          "01:15": "Dreams are all crystallized with",
-          "01:20": "Please,",
-          "01:22": "crack a little smile",
-          "01:24": "You'll be alone",
-          "01:27": "In this world you've chosen as your own",
-          "01:31": "Don't worry,",
-          "01:34": "I'm well aware",
-          "01:35": "That was no fake smell",
-          "01:39": "Deeply in",
-          "01:43": "Vicious sign,",
-          "01:45": "more than all parts free",
-          "01:47": "So add in",
-          "01:50": "Flamboyant lean to the goodnight",
-          "02:04": "Both voyage,",
-          "02:07": "may your path be clear",
-          "02:09": "May you get aware",
-          "02:12": "Dreams are all crystallized with",
-          "02:16": "Please,",
-          "02:19": "crack a little smile",
-          "02:21": "You'll be alone",
-          "02:23": "In this world you've chosen as your own",
-          "02:28": "Time is such a desperate hour",
-          "02:34": "Guess I'll spend my whole life forever with you",
-          "02:40": "Though it might cost me everything I have",
-          "02:45": "I'll never regret",
-          "02:47": "Oh,",
-          "02:49": "there hasn't any other way",
-          "02:51": "Guess those two trees start laying on their lonely roads",
-          "02:57": "Will find their destination",
-          "03:00": "See the cosmos",
-          "03:02": "Missing you in this whirlwind snowboard",
-          "03:08": "The most beautiful thing ever happened to be",
-          "03:43": "Missing you in this whirlwind snowboard"
-        }
-      };
-      this.loadLyricsFromJson(voyagingJson);
-      this.hasCustomLyrics = false;
-      this.rawLyricsJson = JSON.stringify(voyagingJson, null, 4);
-    } else if (title.includes('spoken')) {
-      this.lyrics = [
-        { time: 0, text: "♪ Intro musical ♪" },
-        { time: 8, text: "Words left unspoken in the quiet room" },
-        { time: 16, text: "Shadows dancing in the twilight gloom" },
-        { time: 25, text: "Every whispered promise we used to hold" },
-        { time: 35, text: "Now turns to memories spun of gold" },
-        { time: 45, text: "Spoken for, forever in my mind" },
-        { time: 55, text: "Leaving all the sorrow far behind" },
-        { time: 66, text: "♪ Instrumental ♪" }
-      ];
-      this.lyricsStatus = 'loaded';
-    } else {
-      this.lyrics = [];
-      this.lyricsStatus = 'waiting';
     }
   }
 

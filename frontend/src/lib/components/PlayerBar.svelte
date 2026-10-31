@@ -93,7 +93,131 @@
   ></audio>
 {/if}
 
-<footer class="h-24 bg-zinc-950/95 backdrop-blur-2xl border-t border-white/10 px-6 flex items-center justify-between select-none relative z-40 shadow-2xl">
+<!-- 1. MOBILE FLOATING PLAYER (Estilo Floating Dock / Dynamic Island de Apple Music & Spotify) -->
+<div class="md:hidden fixed bottom-2 left-2.5 right-2.5 z-40 pb-[env(safe-area-inset-bottom,0px)]">
+  <div class="relative overflow-hidden rounded-2xl bg-zinc-900/98 backdrop-blur-2xl border border-white/20 p-2.5 shadow-[0_12px_36px_rgba(0,0,0,0.9)] select-none">
+    <!-- Ambient subtle color border glow -->
+    <div
+      class="absolute top-0 left-0 right-0 h-[2px] opacity-80"
+      style="background: linear-gradient(90deg, #6366f1, #ec4899);"
+    ></div>
+
+    <!-- Top Progress Bar (muestra el avance de la canción) -->
+    <div class="absolute top-0 left-0 right-0 h-[2.5px] bg-white/10">
+      <div
+        class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-150"
+        style="width: {currentPct}%;"
+      ></div>
+    </div>
+
+    {#if player.currentTrack}
+      <div class="flex items-center justify-between gap-2.5">
+        <!-- Tocar carátula / título abre el Modo Cinema / Fullscreen -->
+        <div
+          role="button"
+          tabindex="0"
+          onclick={() => (player.isFullscreen = true)}
+          onkeydown={(e) => { if (e.key === 'Enter') player.isFullscreen = true; }}
+          class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+        >
+          <div class="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-white/15 bg-white/5 flex items-center justify-center shadow-md">
+            {#if player.currentTrack.coverUrl}
+              <img src={player.currentTrack.coverUrl} alt={player.currentTrack.title} class="w-full h-full object-cover" />
+            {:else}
+              <span class="text-base">🎵</span>
+            {/if}
+          </div>
+
+          <div class="min-w-0 flex-1 pr-1">
+            <p class="text-xs font-bold text-white truncate">
+              {player.currentTrack.title}
+            </p>
+            <p class="text-[11px] text-zinc-400 truncate">
+              {player.currentTrack.artist}
+            </p>
+          </div>
+        </div>
+
+        <!-- Mobile Controls -->
+        <div class="flex items-center gap-1 shrink-0">
+          <!-- Lyrics button -->
+          <button
+            type="button"
+            onclick={() => (player.isFullscreen = true)}
+            class="p-2 text-zinc-300 hover:text-pink-300 rounded-full transition active:scale-95"
+            title="Ver letras"
+          >
+            <span class="text-sm">🎤</span>
+          </button>
+
+          <!-- Play / Pause Button -->
+          <button
+            type="button"
+            onclick={() => player.togglePlay()}
+            class="w-10 h-10 rounded-full bg-white hover:bg-zinc-100 text-black flex items-center justify-center shadow-lg active:scale-90 transition"
+            title={player.isPlaying ? 'Pausar' : 'Reproducir'}
+          >
+            {#if player.isPlaying}
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            {:else}
+              <svg class="w-4 h-4 fill-current translate-x-0.5" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            {/if}
+          </button>
+
+          <!-- Next Button -->
+          <button
+            type="button"
+            onclick={() => player.nextTrack()}
+            class="p-2 text-zinc-300 hover:text-white rounded-full transition active:scale-95"
+            title="Siguiente"
+          >
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    {:else}
+      <!-- Estado cuando aún no hay canción seleccionada -->
+      <div
+        role="button"
+        tabindex="0"
+        onclick={() => {
+          if (player.tracks.length > 0) player.play(player.tracks[0]);
+        }}
+        onkeydown={(e) => {
+          if (e.key === 'Enter' && player.tracks.length > 0) player.play(player.tracks[0]);
+        }}
+        class="flex items-center justify-between w-full py-1 px-1 cursor-pointer"
+      >
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-base shrink-0">
+            ♪
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-white truncate">ECHO Music</p>
+            <p class="text-[11px] text-zinc-400 truncate">
+              {player.tracks.length > 0 ? 'Toca aquí para reproducir' : 'Cargando música...'}
+            </p>
+          </div>
+        </div>
+
+        {#if player.tracks.length > 0}
+          <div class="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center text-xs font-bold shadow-md shrink-0">
+            ▶
+          </div>
+        {/if}
+      </div>
+    {/if}
+  </div>
+</div>
+
+<!-- 2. DESKTOP FULL PLAYER (Pantallas medianas y grandes) -->
+<footer class="hidden md:flex shrink-0 h-24 bg-zinc-950/95 backdrop-blur-2xl border-t border-white/10 px-6 items-center justify-between select-none relative z-40 shadow-2xl">
   <!-- Dynamic ambient color reflection on bottom bar -->
   <div
     class="absolute -top-1 left-0 right-0 h-[1px] opacity-60 transition-all duration-700 pointer-events-none"
